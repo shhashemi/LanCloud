@@ -1,0 +1,122 @@
+@model List<AdminUserRow>
+@{
+    ViewData["Title"] = "مدیریت کاربران";
+    var totalUsed = Model.Sum(r => r.Used);
+    var totalFiles = Model.Sum(r => r.FileCount);
+    var me = User.Identity?.Name;
+    const double Gb = 1024d * 1024d * 1024d;
+}
+
+<div class="page-head">
+    <div>
+        <h1>@Html.Icon("shield") مدیریت کاربران</h1>
+        <p>سهمیه‌ی فضا، فعال/غیرفعال کردن، نقش مدیر و بازنشانی رمز.</p>
+    </div>
+</div>
+
+<div class="stat-grid">
+    <div class="card stat"><span class="ico">@Html.Icon("users")</span><div><b>@Model.Count</b><span>کاربر</span></div></div>
+    <div class="card stat"><span class="ico">@Html.Icon("file")</span><div><b>@totalFiles</b><span>فایل</span></div></div>
+    <div class="card stat"><span class="ico">@Html.Icon("drive")</span><div><b class="ltr">@Fmt.Size(totalUsed)</b><span>فضای مصرفی کل</span></div></div>
+</div>
+
+<div class="card table-wrap">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>کاربر</th>
+                <th>وضعیت</th>
+                <th>مصرف</th>
+                <th>سهمیه (گیگابایت)</th>
+                <th>آخرین ورود</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var r in Model)
+        {
+            var u = r.User;
+            var isMe = string.Equals(u.Username, me, StringComparison.OrdinalIgnoreCase);
+            var pct = Fmt.Percent(r.Used, u.QuotaBytes);
+
+            <tr>
+                <td class="cell-main">
+                    <div class="cell-user">
+                        <span class="avatar">@(u.DisplayName.Length > 0 ? u.DisplayName.Substring(0, 1).ToUpperInvariant() : "؟")</span>
+                        <div>
+                            <b>@u.DisplayName</b>
+                            <small class="ltr">@@@u.Username</small>
+                        </div>
+                    </div>
+                </td>
+                <td data-label="وضعیت">
+                    <span class="item-badges">
+                        @if (u.IsAdmin) { <span class="badge">@Html.Icon("shield")مدیر</span> }
+                        @if (u.IsActive) { <span class="badge ok">فعال</span> } else { <span class="badge warn">غیرفعال</span> }
+                    </span>
+                </td>
+                <td data-label="مصرف" style="min-width:150px">
+                    <div class="ltr" style="font-weight:600">@Fmt.Size(r.Used) <span class="muted" style="font-weight:400">· @r.FileCount فایل</span></div>
+                    @if (u.QuotaBytes > 0)
+                    {
+                        <div class="meter @(pct >= 90 ? "warn" : "")" style="margin-top:6px"><span style="width:@pct%"></span></div>
+                    }
+                </td>
+                <td data-label="سهمیه">
+                    <form asp-action="SetQuota" method="post" class="quota-form">
+                        <input type="hidden" name="id" value="@u.Id" />
+                        <input class="input" type="number" name="quotaGb" min="0" step="any"
+                               value="@(u.QuotaBytes > 0 ? Math.Round(u.QuotaBytes / Gb, 2).ToString(System.Globalization.CultureInfo.InvariantCulture) : "")"
+                               placeholder="نامحدود" aria-label="سهمیه" />
+                        <button type="submit" class="btn btn-sm btn-icon" aria-label="ذخیره سهمیه" title="ذخیره">@Html.Icon("check")</button>
+                    </form>
+                </td>
+                <td data-label="آخرین ورود">@(u.LastLoginAt != null ? Fmt.DateTimeText(u.LastLoginAt.Value) : "—")</td>
+                <td data-label="عملیات">
+                    <div class="cell-actions">
+                        <button type="button" class="btn btn-sm" data-reset data-id="@u.Id" data-name="@u.DisplayName">@Html.Icon("key") رمز</button>
+                        @if (!isMe)
+                        {
+                            <form asp-action="ToggleActive" method="post">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button type="submit" class="btn btn-sm">@Html.Icon("power") @(u.IsActive ? "غیرفعال" : "فعال‌سازی")</button>
+                            </form>
+                            <form asp-action="ToggleAdmin" method="post">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button type="submit" class="btn btn-sm">@Html.Icon("shield") @(u.IsAdmin ? "حذف نقش مدیر" : "مدیر کن")</button>
+                            </form>
+                            <form asp-action="Delete" method="post" data-confirm="«@u.DisplayName» و همه‌ی فایل‌هایش برای همیشه حذف شود؟">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger" aria-label="حذف کاربر">@Html.Icon("trash")</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="badge">این حساب خودت است</span>
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<dialog id="resetDlg" aria-labelledby="resetTitle">
+    <form asp-action="ResetPassword" method="post">
+        <input type="hidden" name="id" />
+        <div class="dlg-head"><h3 id="resetTitle">بازنشانی رمز</h3></div>
+        <div class="dlg-body">
+            <p style="margin-bottom:14px">رمز جدید برای «<b id="resetName"></b>»</p>
+            <div class="field">
+                <label for="resetPassword">رمز جدید</label>
+                <input class="input ltr" id="resetPassword" type="text" name="newPassword" minlength="6" required autocomplete="off" />
+                <span class="hint">حداقل ۶ کاراکتر</span>
+            </div>
+        </div>
+        <div class="dlg-foot">
+            <button type="submit" class="btn btn-primary">تغییر رمز</button>
+            <button type="button" class="btn" data-close>انصراف</button>
+        </div>
+    </form>
+</dialog>

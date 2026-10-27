@@ -1,0 +1,91 @@
+@model ItemListVm
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty">
+        <div class="ico">@Html.Icon("cloud")</div>
+        <h3>@Model.EmptyTitle</h3>
+        @if (!string.IsNullOrWhiteSpace(Model.EmptyText))
+        {
+            <p>@Model.EmptyText</p>
+        }
+    </div>
+}
+else
+{
+    <div id="items" class="items view-grid">
+        @foreach (var row in Model.Items)
+        {
+            var item = row.Item;
+            var kind = item.IsFolder ? null : FileTypes.Get(item.Name);
+            var ftClass = item.IsFolder ? "ft-folder" : kind!.Css;
+            var icon = item.IsFolder ? "folder" : kind!.Icon;
+            var kindLabel = item.IsFolder ? "پوشه" : kind!.Label;
+
+            string href;
+            if (!item.IsFolder) href = Url.Action("Download", "Files", new { id = item.Id })!;
+            else if (Model.Owned) href = Url.Action("Index", "Files", new { folder = item.Id })!;
+            else href = Url.Action("Folder", "Share", new { id = item.Id })!;
+
+            <div class="item @(item.IsFolder ? "is-folder" : "") @ftClass"
+                 data-id="@item.Id"
+                 data-name="@item.Name"
+                 data-folder="@(item.IsFolder ? "1" : "0")"
+                 data-preview="@(kind?.Preview)"
+                 draggable="@(Model.Owned ? "true" : "false")">
+
+                <a class="item-main" href="@href" title="@item.Name">
+                    <span class="item-icon @(item.IsFolder ? "is-folder" : "")">@Html.Icon(icon)</span>
+                    <span class="item-text">
+                        <span class="item-name" dir="auto">@item.Name
+                            @if (item.IsPublic) { <span class="badge in-name">@Html.Icon("globe")عمومی</span> }
+                            @if (row.ShareCount > 0) { <span class="badge in-name">@Html.Icon("users")@row.ShareCount</span> }
+                        </span>
+                        <span class="item-kind">@kindLabel</span>
+                        @if (item.IsPublic || row.ShareCount > 0)
+                        {
+                            <span class="item-badges">
+                                @if (item.IsPublic) { <span class="badge">@Html.Icon("globe")عمومی</span> }
+                                @if (row.ShareCount > 0) { <span class="badge">@Html.Icon("users")@row.ShareCount نفر</span> }
+                            </span>
+                        }
+                    </span>
+                </a>
+
+                <div class="item-meta">
+                    <span class="m-size ltr">@(item.IsFolder ? "—" : Fmt.Size(item.Size))</span>
+                    <span class="m-date">@Fmt.Date(item.UpdatedAt)</span>
+                    @if (Model.ShowOwner && !string.IsNullOrEmpty(row.OwnerName))
+                    {
+                        <span class="m-owner" title="@row.OwnerName">@Html.Icon("user") @row.OwnerName</span>
+                    }
+                </div>
+
+                <div class="menu-wrap">
+                    <button type="button" class="menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="گزینه‌ها">@Html.Icon("more")</button>
+                    <div class="menu" role="menu">
+                        @if (!item.IsFolder && kind!.Preview != null)
+                        {
+                            <button type="button" data-action="preview" role="menuitem">@Html.Icon("eye") پیش‌نمایش</button>
+                        }
+                        @if (item.IsFolder)
+                        {
+                            <a href="@Url.Action("DownloadFolder", "Files", new { id = item.Id })" role="menuitem">@Html.Icon("download") دانلود (zip)</a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Download", "Files", new { id = item.Id })" role="menuitem">@Html.Icon("download") دانلود</a>
+                        }
+                        @if (Model.Owned)
+                        {
+                            <button type="button" data-action="share" role="menuitem">@Html.Icon("share") اشتراک‌گذاری</button>
+                            <hr />
+                            <button type="button" data-action="rename" role="menuitem">@Html.Icon("edit") تغییر نام</button>
+                            <button type="button" class="danger" data-action="delete" role="menuitem">@Html.Icon("trash") حذف</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

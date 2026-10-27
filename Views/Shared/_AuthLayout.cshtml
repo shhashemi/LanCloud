@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+    <partial name="_Head" />
+</head>
+<body>
+    <partial name="_Sprite" />
+
+    <div class="auth">
+        <button type="button" class="btn btn-icon auth-theme" data-theme-toggle aria-label="تغییر تم">
+            <partial name="_ThemeIcon" />
+        </button>
+
+        @RenderBody()
+    </div>
+
+    <div class="toasts" id="toasts" aria-live="polite">
+        @if (TempData["Msg"] is string okMsg)
+        {
+            <div class="toast ok" role="status">@Html.Icon("check")<span>@okMsg</span></div>
+        }
+        @if (TempData["Error"] is string errMsg)
+        {
+            <div class="toast err" role="alert">@Html.Icon("alert")<span>@errMsg</span></div>
+        }
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+@model ShareDialogVm
+@{
+    var link = Model.Item.IsFolder
+        ? Url.Action("Folder", "Share", new { id = Model.Item.Id })
+        : Url.Action("Download", "Files", new { id = Model.Item.Id });
+}
+
+<form asp-controller="Share" asp-action="Save" method="post">
+    <input type="hidden" name="id" value="@Model.Item.Id" />
+
+    <div class="share-public">
+        <div>
+            <b>عمومی برای همه‌ی شبکه</b>
+            <small>همه‌ی اعضا می‌توانند آن را ببینند و دانلود کنند.</small>
+        </div>
+        <label class="switch" aria-label="عمومی">
+            <input type="checkbox" name="isPublic" value="true" @(Model.Item.IsPublic ? "checked" : null) />
+            <i></i>
+        </label>
+    </div>
+
+    <b>اشتراک با اعضای مشخص</b>
+
+    @if (Model.Users.Count == 0)
+    {
+        <p class="muted" style="padding:18px 0">هنوز عضو دیگری در شبکه ثبت‌نام نکرده است.</p>
+    }
+    else
+    {
+        <div class="search" style="max-width:none;margin-top:8px">
+            @Html.Icon("search")
+            <input type="search" id="shareFilter" placeholder="جستجوی عضو…" autocomplete="off" />
+        </div>
+
+        <div class="user-list">
+            @foreach (var u in Model.Users)
+            {
+                <label class="user-row" data-search="@((u.DisplayName + " " + u.Username).ToLowerInvariant())">
+                    <input type="checkbox" name="userIds" value="@u.Id" @(u.Selected ? "checked" : null) />
+                    <span class="avatar">@(u.DisplayName.Length > 0 ? u.DisplayName.Substring(0, 1).ToUpperInvariant() : "؟")</span>
+                    <span>@u.DisplayName<small class="ltr">@@@u.Username</small></span>
+                </label>
+            }
+        </div>
+    }
+
+    <div class="link-box">
+        <input class="input" type="text" readonly value="@(Context.Request.Scheme + "://" + Context.Request.Host + link)" aria-label="لینک" />
+        <button type="button" class="btn" data-copy="@link">@Html.Icon("link") کپی</button>
+    </div>
+    <p class="muted" style="font-size:12.5px;margin-top:6px">این لینک فقط برای اعضایی کار می‌کند که به این مورد دسترسی دارند.</p>
+
+    <div class="dlg-foot" style="padding-inline:0">
+        <button type="submit" class="btn btn-primary">ذخیره</button>
+        <button type="button" class="btn" data-close>انصراف</button>
+    </div>
+</form>

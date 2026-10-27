@@ -1,0 +1,61 @@
+@model ProfileVm
+@{
+    ViewData["Title"] = "پروفایل";
+    var pct = Fmt.Percent(Model.Used, Model.Quota);
+    var initial = Model.DisplayName.Length > 0 ? Model.DisplayName.Substring(0, 1).ToUpperInvariant() : "؟";
+}
+
+<div class="page-head">
+    <div><h1>@Html.Icon("user") پروفایل</h1></div>
+</div>
+
+<div class="profile-head">
+    <span class="avatar lg">@initial</span>
+    <div>
+        <h2 style="font-size:20px">@Model.DisplayName @if (Model.IsAdmin) { <span class="badge">@Html.Icon("shield")مدیر</span> }</h2>
+        <p class="muted ltr">@@@Model.Username</p>
+    </div>
+</div>
+
+<div class="grid-2">
+    <section class="card card-pad">
+        <h2>فضای من</h2>
+        <div class="meter @(pct >= 90 ? "warn" : "")" style="margin-bottom:12px"><span style="width:@(Model.Quota > 0 ? pct : 0)%"></span></div>
+        <dl class="kv">
+            <dt>فضای مصرفی</dt><dd class="ltr">@Fmt.Size(Model.Used)</dd>
+            <dt>سهمیه</dt><dd class="ltr">@(Model.Quota > 0 ? Fmt.Size(Model.Quota) : "نامحدود")</dd>
+            <dt>تعداد فایل‌ها</dt><dd>@Model.FileCount</dd>
+            <dt>تاریخ عضویت</dt><dd>@Fmt.Date(Model.CreatedAt)</dd>
+        </dl>
+    </section>
+
+    <section class="card card-pad">
+        <h2>نام نمایشی</h2>
+        <form asp-action="UpdateProfile" method="post">
+            <div class="field">
+                <label for="displayName">نامی که بقیه می‌بینند</label>
+                <input class="input" id="displayName" name="displayName" value="@Model.DisplayName" maxlength="60" required />
+            </div>
+            <button type="submit" class="btn btn-primary">@Html.Icon("check") ذخیره</button>
+        </form>
+    </section>
+
+    <section class="card card-pad" style="grid-column:1/-1">
+        <h2>تغییر رمز عبور</h2>
+        <form asp-action="ChangePassword" method="post" style="max-width:420px">
+            <div class="field">
+                <label for="currentPassword">رمز فعلی</label>
+                <input class="input ltr" type="password" id="currentPassword" name="currentPassword" autocomplete="current-password" required />
+            </div>
+            <div class="field">
+                <label for="newPassword">رمز جدید</label>
+                <input class="input ltr" type="password" id="newPassword" name="newPassword" autocomplete="new-password" minlength="6" required />
+            </div>
+            <div class="field">
+                <label for="confirmPassword">تکرار رمز جدید</label>
+                <input class="input ltr" type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" minlength="6" required />
+            </div>
+            <button type="submit" class="btn btn-primary">@Html.Icon("key") تغییر رمز</button>
+        </form>
+    </section>
+</div>

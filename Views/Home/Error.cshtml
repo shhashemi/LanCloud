@@ -1,0 +1,11 @@
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "خطا";
+}
+
+<div class="card auth-card status-page">
+    <div class="ico">@Html.Icon("alert")</div>
+    <h1 style="font-size:22px">مشکلی پیش آمد</h1>
+    <p class="muted" style="margin:6px 0 20px">درخواست انجام نشد. دوباره تلاش کن؛ اگر ادامه داشت به مدیر شبکه خبر بده.</p>
+    <a class="btn btn-primary" href="@Url.Action("Index", "Files")">بازگشت به فایل‌ها</a>
+</div>

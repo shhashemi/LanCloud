@@ -1,0 +1,139 @@
+@model FilesIndexVm
+@{
+    ViewData["Title"] = Model.Folder?.Name ?? "فایل‌های من";
+    ViewData["Query"] = Model.Query;
+
+    var folderId = Model.Folder?.Id;
+    var free = Model.Quota > 0 ? Math.Max(0, Model.Quota - Model.Used) : -1;
+    var searching = !string.IsNullOrEmpty(Model.Query);
+}
+
+@if (searching)
+{
+    <div class="crumbs">
+        <a href="@Url.Action("Index", "Files")">@Html.Icon("drive") فایل‌های من</a>
+        @Html.Icon("chevron", "sep")
+        <span class="cur">نتایج جستجو برای «@Model.Query»</span>
+    </div>
+}
+else
+{
+    <nav class="crumbs" aria-label="مسیر">
+        @if (Model.Folder == null)
+        {
+            <span class="cur">@Html.Icon("drive") فایل‌های من</span>
+        }
+        else
+        {
+            <a href="@Url.Action("Index", "Files")" data-drop-folder="">@Html.Icon("drive") فایل‌های من</a>
+            @foreach (var c in Model.Crumbs)
+            {
+                @Html.Icon("chevron", "sep")
+                @if (c.Id == Model.Folder.Id)
+                {
+                    <span class="cur" title="@c.Name">@c.Name</span>
+                }
+                else
+                {
+                    <a href="@Url.Action("Index", "Files", new { folder = c.Id })" data-drop-folder="@c.Id" title="@c.Name">@c.Name</a>
+                }
+            }
+        }
+    </nav>
+}
+
+<div class="page-head">
+    <div>
+        <h1>@Html.Icon(Model.Folder == null ? "drive" : "folder") @(Model.Folder?.Name ?? "فایل‌های من")</h1>
+        <p>@Model.List.Items.Count مورد</p>
+    </div>
+
+    <div class="toolbar">
+        <form method="get" action="@Url.Action("Index", "Files")">
+            @if (folderId != null) { <input type="hidden" name="folder" value="@folderId" /> }
+            @if (searching) { <input type="hidden" name="q" value="@Model.Query" /> }
+            <select class="select" name="sort" data-autosubmit aria-label="مرتب‌سازی">
+                <option value="name" selected="@(Model.Sort == "name")">مرتب‌سازی: نام</option>
+                <option value="date" selected="@(Model.Sort == "date")">مرتب‌سازی: تاریخ</option>
+                <option value="size" selected="@(Model.Sort == "size")">مرتب‌سازی: اندازه</option>
+            </select>
+        </form>
+
+        <div class="seg" role="group" aria-label="نوع نمایش">
+            <button type="button" data-view="grid" aria-label="نمایش شبکه‌ای" class="active">@Html.Icon("grid")</button>
+            <button type="button" data-view="list" aria-label="نمایش لیستی">@Html.Icon("list")</button>
+        </div>
+
+        <button type="button" class="btn" data-open="folderDlg">@Html.Icon("folder-plus") <span class="label">پوشه‌ی جدید</span></button>
+        <button type="button" class="btn btn-primary" id="uploadBtn" data-folder="@folderId" data-free="@free">@Html.Icon("upload") <span class="label">آپلود</span></button>
+    </div>
+</div>
+
+<partial name="_ItemList" model="Model.List" />
+
+<input type="file" id="fileInput" multiple hidden />
+
+<div class="dropzone" id="dropzone" aria-hidden="true">
+    <div class="box">
+        @Html.Icon("upload")
+        <b>فایل‌ها را اینجا رها کن</b>
+        <span>داخل «@(Model.Folder?.Name ?? "فایل‌های من")» آپلود می‌شوند</span>
+    </div>
+</div>
+
+<div class="upload-panel" id="uploadPanel" hidden>
+    <div class="up-head">
+        <span id="uploadTitle">آپلود</span>
+        <button type="button" class="btn btn-sm" id="uploadClose" hidden>بستن</button>
+    </div>
+    <div class="up-list" id="uploadList"></div>
+</div>
+
+<dialog id="folderDlg" aria-labelledby="folderTitle">
+    <form asp-action="CreateFolder" method="post">
+        <input type="hidden" name="parentId" value="@folderId" />
+        <div class="dlg-head"><h3 id="folderTitle">پوشه‌ی جدید</h3></div>
+        <div class="dlg-body">
+            <div class="field">
+                <label for="folderName">نام پوشه</label>
+                <input class="input" id="folderName" name="name" type="text" maxlength="200" required autocomplete="off" dir="auto" />
+            </div>
+        </div>
+        <div class="dlg-foot">
+            <button type="submit" class="btn btn-primary">ساخت</button>
+            <button type="button" class="btn" data-close>انصراف</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="renameDlg" aria-labelledby="renameTitle">
+    <form asp-action="Rename" method="post">
+        <input type="hidden" name="id" />
+        <div class="dlg-head"><h3 id="renameTitle">تغییر نام</h3></div>
+        <div class="dlg-body">
+            <div class="field">
+                <label for="renameName">نام جدید</label>
+                <input class="input" id="renameName" name="name" type="text" maxlength="200" required autocomplete="off" dir="auto" />
+            </div>
+        </div>
+        <div class="dlg-foot">
+            <button type="submit" class="btn btn-primary">ذخیره</button>
+            <button type="button" class="btn" data-close>انصراف</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="deleteDlg" aria-labelledby="deleteTitle">
+    <form asp-action="Delete" method="post">
+        <input type="hidden" name="id" />
+        <div class="dlg-head"><h3 id="deleteTitle">حذف</h3></div>
+        <div class="dlg-body">
+            <p>«<b id="deleteName" dir="auto"></b>» برای همیشه حذف شود؟</p>
+            <p class="muted" id="deleteNote" hidden>همه‌ی فایل‌ها و پوشه‌های داخل آن هم حذف می‌شوند.</p>
+        </div>
+        <div class="dlg-foot">
+            <button type="submit" class="btn btn-danger">حذف</button>
+            <button type="button" class="btn" data-close>انصراف</button>
+        </div>
+    </form>
+</dialog>

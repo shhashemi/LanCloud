@@ -1,0 +1,52 @@
+@model RegisterVm
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "ثبت‌نام";
+    var isFirst = ViewBag.IsFirst is true;
+}
+
+<div class="card auth-card">
+    <div class="auth-brand">
+        <span class="brand-logo">@Html.Icon("cloud")</span>
+        <h1>ساخت حساب</h1>
+        <p>فضای ابری شخصی خودت را در شبکه داشته باش.</p>
+    </div>
+
+    @if (isFirst)
+    {
+        <div class="notice">@Html.Icon("info")<span>تو اولین کاربر هستی؛ این حساب به‌عنوان مدیر شبکه ساخته می‌شود.</span></div>
+    }
+
+    <form asp-action="Register" method="post">
+        <div asp-validation-summary="ModelOnly"></div>
+
+        <div class="field">
+            <label asp-for="DisplayName">نام نمایشی</label>
+            <input asp-for="DisplayName" class="input" autocomplete="name" autofocus />
+            <span asp-validation-for="DisplayName"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="Username">نام کاربری</label>
+            <input asp-for="Username" class="input ltr" autocomplete="username" />
+            <span class="hint">حروف انگلیسی، عدد، نقطه، خط تیره و زیرخط (۳ تا ۳۰ کاراکتر)</span>
+            <span asp-validation-for="Username"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="Password">رمز عبور</label>
+            <input asp-for="Password" class="input ltr" autocomplete="new-password" />
+            <span asp-validation-for="Password"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="ConfirmPassword">تکرار رمز عبور</label>
+            <input asp-for="ConfirmPassword" class="input ltr" autocomplete="new-password" />
+            <span asp-validation-for="ConfirmPassword"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">@Html.Icon("user") ثبت‌نام</button>
+    </form>
+
+    <p class="auth-foot">قبلاً ثبت‌نام کرده‌ای؟ <a href="@Url.Action("Login", "Account")">ورود</a></p>
+</div>

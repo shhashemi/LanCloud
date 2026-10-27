@@ -1,0 +1,42 @@
+@model LoginVm
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "ورود";
+    var canRegister = ViewBag.CanRegister is true;
+}
+
+<div class="card auth-card">
+    <div class="auth-brand">
+        <span class="brand-logo">@Html.Icon("cloud")</span>
+        <h1>ابر محلی</h1>
+        <p>برای ورود به فضای ابری شبکه، وارد شو.</p>
+    </div>
+
+    <form asp-action="Login" method="post">
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div asp-validation-summary="ModelOnly"></div>
+
+        <div class="field">
+            <label asp-for="Username">نام کاربری</label>
+            <input asp-for="Username" class="input ltr" autocomplete="username" autofocus />
+            <span asp-validation-for="Username"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="Password">رمز عبور</label>
+            <input asp-for="Password" class="input ltr" autocomplete="current-password" />
+            <span asp-validation-for="Password"></span>
+        </div>
+
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:18px;cursor:pointer">
+            <input asp-for="RememberMe" /> مرا به خاطر بسپار
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-block">@Html.Icon("lock") ورود</button>
+    </form>
+
+    @if (canRegister)
+    {
+        <p class="auth-foot">حساب نداری؟ <a href="@Url.Action("Register", "Account")">ثبت‌نام</a></p>
+    }
+</div>

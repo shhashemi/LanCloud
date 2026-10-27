@@ -1,0 +1,39 @@
+@model ShareFolderVm
+@{
+    ViewData["Title"] = Model.Folder.Name;
+    var rootAction = Model.ViaShare ? "Index" : "Network";
+    var rootLabel = Model.ViaShare ? "با من به اشتراک گذاشته شده" : "فایل‌های شبکه";
+    var rootIcon = Model.ViaShare ? "inbox" : "globe";
+}
+
+<nav class="crumbs" aria-label="مسیر">
+    <a href="@Url.Action(rootAction, "Share")">@Html.Icon(rootIcon) @rootLabel</a>
+    @foreach (var c in Model.Crumbs)
+    {
+        @Html.Icon("chevron", "sep")
+        @if (c.Id == Model.Folder.Id)
+        {
+            <span class="cur" title="@c.Name">@c.Name</span>
+        }
+        else
+        {
+            <a href="@Url.Action("Folder", "Share", new { id = c.Id })" title="@c.Name">@c.Name</a>
+        }
+    }
+</nav>
+
+<div class="page-head">
+    <div>
+        <h1>@Html.Icon("folder") @Model.Folder.Name</h1>
+        <p>@Model.List.Items.Count مورد @(Model.Folder.Owner != null ? "• متعلق به " + Model.Folder.Owner.DisplayName : "")</p>
+    </div>
+    <div class="toolbar">
+        <div class="seg" role="group" aria-label="نوع نمایش">
+            <button type="button" data-view="grid" aria-label="نمایش شبکه‌ای" class="active">@Html.Icon("grid")</button>
+            <button type="button" data-view="list" aria-label="نمایش لیستی">@Html.Icon("list")</button>
+        </div>
+        <a class="btn" href="@Url.Action("DownloadFolder", "Files", new { id = Model.Folder.Id })">@Html.Icon("download") <span class="label">دانلود (zip)</span></a>
+    </div>
+</div>
+
+<partial name="_ItemList" model="Model.List" />

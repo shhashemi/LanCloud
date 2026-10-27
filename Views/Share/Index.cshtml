@@ -1,0 +1,19 @@
+@model ItemListVm
+@{
+    ViewData["Title"] = "با من به اشتراک گذاشته شده";
+}
+
+<div class="page-head">
+    <div>
+        <h1>@Html.Icon("inbox") با من به اشتراک گذاشته شده</h1>
+        <p>فایل‌ها و پوشه‌هایی که اعضای دیگر مشخصاً برای تو گذاشته‌اند.</p>
+    </div>
+    <div class="toolbar">
+        <div class="seg" role="group" aria-label="نوع نمایش">
+            <button type="button" data-view="grid" aria-label="نمایش شبکه‌ای" class="active">@Html.Icon("grid")</button>
+            <button type="button" data-view="list" aria-label="نمایش لیستی">@Html.Icon("list")</button>
+        </div>
+    </div>
+</div>
+
+<partial name="_ItemList" model="Model" />

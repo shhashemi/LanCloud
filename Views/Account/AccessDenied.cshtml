@@ -1,0 +1,11 @@
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "دسترسی ندارید";
+}
+
+<div class="card auth-card status-page">
+    <div class="ico">@Html.Icon("lock")</div>
+    <h1 style="font-size:22px">دسترسی ندارید</h1>
+    <p class="muted" style="margin:6px 0 20px">اجازه‌ی دیدن این صفحه را نداری.</p>
+    <a class="btn btn-primary" href="@Url.Action("Index", "Files")">بازگشت به فایل‌ها</a>
+</div>

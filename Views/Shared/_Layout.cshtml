@@ -1,0 +1,189 @@
+@using System.Security.Claims
+@inject StorageService Storage
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var ctrl = (ViewContext.RouteData.Values["controller"] as string ?? "").ToLowerInvariant();
+    var act = (ViewContext.RouteData.Values["action"] as string ?? "").ToLowerInvariant();
+
+    var display = User.FindFirst(ClaimTypes.GivenName)?.Value ?? User.Identity?.Name ?? "";
+    var initial = display.Length > 0 ? display.Substring(0, 1).ToUpperInvariant() : "؟";
+    var isAdmin = User.IsInRole("Admin");
+
+    long used = 0, quota = 0;
+    if (int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var uid))
+    {
+        (used, quota) = await Storage.GetUsageAsync(uid);
+    }
+    var pct = Fmt.Percent(used, quota);
+
+    string Active(bool on) => on ? "active" : "";
+
+    // جستجو فقط در صفحات فایل و اشتراک
+    string? searchAction = null;
+    if (ctrl == "files" && act == "index") searchAction = Url.Action("Index", "Files");
+    else if (ctrl == "share" && act == "index") searchAction = Url.Action("Index", "Share");
+    else if (ctrl == "share" && act == "network") searchAction = Url.Action("Network", "Share");
+
+    var query = ViewData["Query"] as string;
+    var csrf = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+    <partial name="_Head" />
+    <meta name="csrf-token" content="@csrf" />
+</head>
+<body>
+    <partial name="_Sprite" />
+
+    <div class="app">
+        <aside class="sidebar" id="sidebar">
+            <button type="button" class="btn btn-ghost btn-icon btn-sm sidebar-close" data-menu-toggle aria-label="بستن منو">@Html.Icon("x")</button>
+            <a class="brand" href="@Url.Action("Index", "Files")">
+                <span class="brand-logo">@Html.Icon("cloud")</span>
+                <span><b>ابر محلی</b><small>فضای ابری شبکه</small></span>
+            </a>
+
+            <a class="side-user" href="@Url.Action("Profile", "Account")">
+                <span class="avatar">@initial</span>
+                <span><b>@display</b><small>مشاهده پروفایل</small></span>
+            </a>
+
+            <nav class="nav" aria-label="منوی اصلی">
+                <a class="@Active(ctrl == "files")" href="@Url.Action("Index", "Files")">@Html.Icon("drive") فایل‌های من</a>
+
+                <div class="nav-title">اشتراک‌گذاری</div>
+                <a class="@Active(ctrl == "share" && act != "network")" href="@Url.Action("Index", "Share")">@Html.Icon("inbox") با من به اشتراک گذاشته شده</a>
+                <a class="@Active(ctrl == "share" && act == "network")" href="@Url.Action("Network", "Share")">@Html.Icon("globe") فایل‌های شبکه</a>
+
+                <div class="nav-title">حساب</div>
+                <a class="@Active(ctrl == "account")" href="@Url.Action("Profile", "Account")">@Html.Icon("user") پروفایل</a>
+                @if (isAdmin)
+                {
+                    <a class="@Active(ctrl == "admin")" href="@Url.Action("Index", "Admin")">@Html.Icon("shield") مدیریت کاربران</a>
+                }
+            </nav>
+
+            <div class="side-mobile">
+                <button type="button" class="side-row" data-theme-toggle>
+                    <partial name="_ThemeIcon" />
+                    <span class="lbl-to-light">تم روشن</span><span class="lbl-to-dark">تم تاریک</span>
+                </button>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="side-row danger">@Html.Icon("logout") خروج از حساب</button>
+                </form>
+            </div>
+
+            <div class="storage">
+                <div class="storage-head"><span>فضای ذخیره‌سازی</span>@Html.Icon("drive")</div>
+                <div class="meter @(pct >= 90 ? "warn" : "")"><span style="width:@(quota > 0 ? pct : 0)%"></span></div>
+                <small>
+                    <span class="ltr">@Fmt.Size(used)</span>
+                    @if (quota > 0)
+                    {
+                        <text> از </text><span class="ltr">@Fmt.Size(quota)</span>
+                    }
+                    else
+                    {
+                        <text> — بدون محدودیت</text>
+                    }
+                </small>
+            </div>
+        </aside>
+
+        <div class="main">
+            <header class="topbar">
+                <button type="button" class="btn btn-ghost btn-icon menu-toggle" data-menu-toggle aria-label="منو" aria-controls="sidebar" aria-expanded="false"><span class="swap-ico menu-ico" aria-hidden="true">@Html.Icon("menu", "ico-a")@Html.Icon("x", "ico-b")</span></button>
+
+                @if (searchAction != null)
+                {
+                    <form class="search" method="get" action="@searchAction" role="search">
+                        @Html.Icon("search")
+                        <input type="search" name="q" value="@query" placeholder="جستجوی فایل‌ها…" aria-label="جستجو" autocomplete="off" />
+                    </form>
+                }
+
+                <span class="spacer"></span>
+
+                <button type="button" class="btn btn-ghost btn-icon desk-only" data-theme-toggle aria-label="تغییر تم">
+                    <partial name="_ThemeIcon" />
+                </button>
+
+                <a class="user-chip desk-only" href="@Url.Action("Profile", "Account")">
+                    <span class="avatar">@initial</span>
+                    <span class="name">@display</span>
+                </a>
+
+                <form class="desk-only" asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="btn btn-ghost btn-icon" aria-label="خروج" title="خروج">@Html.Icon("logout")</button>
+                </form>
+            </header>
+
+            <main class="content">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <div class="backdrop" id="backdrop"></div>
+
+    <div class="toasts" id="toasts" aria-live="polite">
+        @if (TempData["Msg"] is string okMsg)
+        {
+            <div class="toast ok" role="status">@Html.Icon("check")<span>@okMsg</span></div>
+        }
+        @if (TempData["Error"] is string errMsg)
+        {
+            <div class="toast err" role="alert">@Html.Icon("alert")<span>@errMsg</span></div>
+        }
+    </div>
+
+    @* ───── دیالوگ‌های مشترک ───── *@
+    <dialog id="confirmDlg" aria-labelledby="confirmTitle">
+        <div class="dlg-head"><h3 id="confirmTitle">تأیید</h3></div>
+        <div class="dlg-body"><p id="confirmText"></p></div>
+        <div class="dlg-foot">
+            <button type="button" class="btn btn-danger" id="confirmOk">تأیید</button>
+            <button type="button" class="btn" data-close>انصراف</button>
+        </div>
+    </dialog>
+
+    <dialog id="previewDlg" class="dlg-preview" aria-labelledby="previewTitle" tabindex="-1" autofocus>
+        <div class="dlg-head">
+            <h3 id="previewTitle"></h3>
+            <span class="toolbar">
+                <span class="pv-count" id="previewCount" hidden></span>
+                <a class="btn btn-sm" id="previewDownload" href="#">@Html.Icon("download") <span class="label">دانلود</span></a>
+                <button type="button" class="btn btn-ghost btn-icon btn-sm" data-close aria-label="بستن">@Html.Icon("x")</button>
+            </span>
+        </div>
+        <div class="dlg-body">
+            <div class="preview-stage" id="previewStage"></div>
+            <button type="button" class="pv-nav pv-prev" id="pvPrev" aria-label="قبلی" hidden>@Html.Icon("chevron")</button>
+            <button type="button" class="pv-nav pv-next" id="pvNext" aria-label="بعدی" hidden>@Html.Icon("chevron")</button>
+        </div>
+    </dialog>
+
+    <dialog id="shareDlg" class="dlg-lg" aria-labelledby="shareTitle">
+        <div class="dlg-head">
+            <h3>اشتراک‌گذاری «<span id="shareTitle"></span>»</h3>
+            <button type="button" class="btn btn-ghost btn-icon btn-sm" data-close aria-label="بستن">@Html.Icon("x")</button>
+        </div>
+        <div class="dlg-body" id="shareBody"></div>
+    </dialog>
+
+    <script>
+        window.LC = {
+            urls: {
+                preview: '@Url.Action("Preview", "Files")',
+                download: '@Url.Action("Download", "Files")',
+                upload: '@Url.Action("Upload", "Files")',
+                move: '@Url.Action("Move", "Files")',
+                shareManage: '@Url.Action("Manage", "Share")'
+            }
+        };
+    </script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
