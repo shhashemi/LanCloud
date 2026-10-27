@@ -64,6 +64,7 @@ else
                 <div class="menu-wrap">
                     <button type="button" class="menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="گزینه‌ها">@Html.Icon("more")</button>
                     <div class="menu" role="menu">
+                        <div class="menu-info">تاریخ: @Fmt.Date(item.UpdatedAt)</div>
                         @if (!item.IsFolder && kind!.Preview != null)
                         {
                             <button type="button" data-action="preview" role="menuitem">@Html.Icon("eye") پیش‌نمایش</button>
