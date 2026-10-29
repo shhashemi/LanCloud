@@ -470,6 +470,8 @@ svg {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  width:60%;
+  justify-content: end;
 }
 
 /* ───────────── دکمه‌ها و فرم‌ها ───────────── */
@@ -995,6 +997,10 @@ input[type="checkbox"] {
 
 .view-list .m-date {
   min-width: 96px;
+}
+
+.m-date {
+  margin-right: 10px;
 }
 
 .view-list .m-owner {
@@ -2547,6 +2553,7 @@ dialog:focus {
 .pv-media.ready {
   opacity: 1;
   transform: none;
+  max-height:75vh;
 }
 
 .pv-loader {
@@ -2698,44 +2705,7 @@ dialog:focus {
   }
 }
 
-@media (max-width: 720px) {
-
-  /* تاریخ و مالک در موبایل نمایش داده نشوند */
-  .view-list .m-date,
-  .view-list .m-owner {
-    display: none !important;
-  }
-
-  /* حجم و نوع زیر اسم، بدون حداقل عرض */
-  .view-list .m-size {
-    min-width: 0;
-  }
-
-  .view-list .item-kind {
-    display: block;
-  }
-
-  /* اسم فایل کامل دیده شود: تا دو خط بشکند */
-  .view-list .item-name {
-    white-space: normal;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    word-break: break-word;
-  }
-
-  .view-list .item {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 8px;
-  }
-
-  /* نمایش تاریخ داخل منوی سه‌نقطه */
-  .menu .menu-info {
-    display: block;
-  }
-}
-
+/* تاریخ داخل منوی سه‌نقطه: فقط موبایل */
 .menu .menu-info {
   display: none;
   padding: 8px 12px 6px;
@@ -2747,13 +2717,12 @@ dialog:focus {
 
 @media (max-width: 720px) {
 
-  /* تاریخ و مالک در موبایل نمایش داده نشوند */
+  /* تاریخ و مالک در ردیف‌ها نمایش داده نشوند */
   .view-list .m-date,
   .view-list .m-owner {
     display: none !important;
   }
 
-  /* حجم و نوع زیر اسم، بدون حداقل عرض */
   .view-list .m-size {
     min-width: 0;
   }
@@ -2762,30 +2731,9 @@ dialog:focus {
     display: block;
   }
 
-  /* اسم فایل کامل دیده شود: تا دو خط بشکند */
-  .view-list .item-name {
-    white-space: normal;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    word-break: break-word;
-  }
-
-
-  /* نمایش تاریخ داخل منوی سه‌نقطه */
   .menu .menu-info {
     display: block;
   }
-}
-
-.menu .menu-info {
-  display: none;
-  padding: 8px 12px 6px;
-  font-size: 12.5px;
-  color: var(--muted);
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 6px;
 }
 
 @media (max-width: 720px) {
@@ -2806,4 +2754,44 @@ dialog:focus {
     order: 99;
     margin-inline-start: auto;
   }
+}
+
+/* اسم فایل: یک خط و خلاصه‌شده با … */
+.item-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  /* جلوگیری از منوی نگه‌داشتن لینک در iOS */
+}
+
+/* تولتیپ اسم کامل */
+.name-tip {
+  position: fixed;
+  z-index: 200;
+  max-width: min(86vw, 420px);
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.6;
+  word-break: break-word;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .12s ease, transform .12s ease;
+}
+
+.name-tip.show {
+  opacity: 1;
+  transform: none;
+}
+.preview-title {
+    width: 40%;
 }

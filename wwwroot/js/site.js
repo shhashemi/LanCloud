@@ -695,3 +695,89 @@
     window.addEventListener('drop', (e) => { if (hasType(e, 'Files')) e.preventDefault(); });
   }
 })();
+(function () {
+    var tip = document.createElement('div');
+    tip.className = 'name-tip';
+    tip.setAttribute('role', 'tooltip');
+    document.body.appendChild(tip);
+
+    var holdTimer = null, hideTimer = null, startX = 0, startY = 0, suppressClickUntil = 0;
+
+    function fullName(el) {
+        var c = el.cloneNode(true);
+        c.querySelectorAll('.badge').forEach(function (b) { b.remove(); });
+        return (el.getAttribute('data-full-name') || c.textContent).trim();
+    }
+
+    function isTruncated(el) {
+        return el.scrollWidth > el.clientWidth + 1;
+    }
+
+    function show(el) {
+        if (!isTruncated(el)) return;
+        clearTimeout(hideTimer);
+        tip.textContent = fullName(el);
+        tip.setAttribute('dir', 'auto');
+        var r = el.getBoundingClientRect();
+        tip.style.left = '0px';
+        tip.style.top = '0px';
+        tip.classList.add('show');
+        var w = tip.offsetWidth, h = tip.offsetHeight, m = 8;
+        var left = Math.min(Math.max(m, r.left), window.innerWidth - w - m);
+        var top = r.bottom + 6;
+        if (top + h > window.innerHeight - m) top = Math.max(m, r.top - h - 6);
+        tip.style.left = left + 'px';
+        tip.style.top = top + 'px';
+    }
+
+    function hide(delay) {
+        clearTimeout(holdTimer);
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(function () { tip.classList.remove('show'); }, delay || 0);
+    }
+
+    // موس
+    document.addEventListener('pointerover', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        var el = e.target.closest && e.target.closest('.item-name');
+        if (el) show(el);
+    });
+    document.addEventListener('pointerout', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        if (e.target.closest && e.target.closest('.item-name')) hide(0);
+    });
+
+    // انگشت: نگه‌داشتن
+    document.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse') return;
+        var el = e.target.closest && e.target.closest('.item-name');
+        if (!el) { hide(0); return; }
+        startX = e.clientX; startY = e.clientY;
+        clearTimeout(holdTimer);
+        holdTimer = setTimeout(function () {
+            show(el);
+            suppressClickUntil = Date.now() + 700; // باز نشدن فایل بعد از رها کردن
+        }, 450);
+    });
+    document.addEventListener('pointermove', function (e) {
+        if (e.pointerType === 'mouse') return;
+        if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) clearTimeout(holdTimer);
+    });
+    ['pointerup', 'pointercancel'].forEach(function (t) {
+        document.addEventListener(t, function (e) {
+            if (e.pointerType === 'mouse') return;
+            clearTimeout(holdTimer);
+            hide(1800); // تولتیپ بعد از رها کردن کمی می‌ماند
+        });
+    });
+
+    document.addEventListener('click', function (e) {
+        if (Date.now() < suppressClickUntil) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+
+    document.addEventListener('contextmenu', function (e) {
+        if (e.target.closest && e.target.closest('.item-name')) e.preventDefault();
+    });
+
+    window.addEventListener('scroll', function () { hide(0); }, true);
+})();
