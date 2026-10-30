@@ -50,6 +50,7 @@ Anyone on the same network, from a computer, phone, tablet, or any other device 
 - 📁 **Folders**: create and organize your files in a folder structure
 - 📊 **Per-user storage quotas** (default: 100 GB, configurable)
 - 🔍 **Search and sorting** for files and folders
+- 👁️ **File preview**: preview files right in the browser without downloading them first
 - 🔗 **Sharing**: share a file or folder with specific users, or make it public (anyone with the link on your network)
 - 🛠️ **Admin panel**: manage users (including their quotas)
 - 🎨 **Modern UI with light and dark themes**
@@ -71,6 +72,10 @@ Anyone on the same network, from a computer, phone, tablet, or any other device 
 | Admin panel | Mobile view |
 | :---: | :---: |
 | ![Admin panel](docs/screenshots/admin.png) | ![Mobile view](docs/screenshots/mobile.png) |
+
+| File preview |
+| :---: |
+| ![File preview](docs/screenshots/preview.png) |
 
 ## How It Works
 
@@ -404,6 +409,7 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 - 📁 **پوشه‌بندی**: فایل‌ها را در ساختار پوشه‌ای سازماندهی کنید
 - 📊 **سهمیه‌بندی کاربران** (پیش‌فرض ۱۰۰ گیگابایت برای هر کاربر، قابل تغییر)
 - 🔍 **جستجو و مرتب‌سازی** فایل‌ها و پوشه‌ها
+- 👁️ **پیش‌نمایش فایل‌ها**: مشاهده فایل‌ها مستقیماً در مرورگر، بدون نیاز به دانلود
 - 🔗 **اشتراک‌گذاری** فایل یا پوشه با اشخاص مشخص، یا به‌صورت **عمومی**
 - 🛠️ **بخش مدیریت کاربران** مخصوص مدیر وب‌سایت (شامل مدیریت سهمیه هر کاربر)
 - 🎨 **ظاهر زیبا و مدرن** با دو پوسته **تاریک** و **روشن**
@@ -425,6 +431,10 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 | پنل مدیریت | نمای موبایل |
 | :---: | :---: |
 | ![پنل مدیریت](docs/screenshots/admin.png) | ![نمای موبایل](docs/screenshots/mobile.png) |
+
+| پیش‌نمایش فایل |
+| :---: |
+| ![پیش‌نمایش فایل](docs/screenshots/preview.png) |
 
 ## نحوه کارکرد
 
@@ -495,7 +505,7 @@ git --version
 **۱. دریافت پروژه از گیت‌هاب**
 
 ```bash
-git clone https://github.com/<your-username>/LanCloud.git
+git clone https://github.com/shhashemi/LanCloud.git
 cd LanCloud
 ```
 
@@ -525,13 +535,7 @@ dotnet run
 
 ```json
 {
-  "Kestrel": {
-    "Endpoints": {
-      "Http": {
-        "Url": "http://0.0.0.0:5000"
-      }
-    }
-  }
+  "Url": "http://0.0.0.0:5000"
 }
 ```
 
@@ -544,7 +548,7 @@ dotnet run
 ```json
 {
   "Storage": {
-    "DefaultUserQuotaGB": 100
+    "DefaultQuotaGB": 100
   }
 }
 ```
