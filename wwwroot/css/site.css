@@ -3,7 +3,7 @@
    تم آبی، روشن/تاریک، راست‌چین، ریسپانسیو. بدون هیچ وابستگی به اینترنت.
    ========================================================================== */
 
-/* فونت وزیرمتن (اختیاری): فایل Yekan.woff2 را در wwwroot/fonts بگذار. در غیر این صورت از فونت سیستم استفاده می‌شود. */
+/* فونت وزیرمتن (اختیاری): فایل Yekan.ttf را در wwwroot/fonts بگذار. در غیر این صورت از فونت سیستم استفاده می‌شود. */
 @font-face {
   font-family: "Yekan";
   src: url("../fonts/YekanBakh-SemiBold.ttf") format("truetype");
@@ -470,7 +470,7 @@ svg {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  width:60%;
+  width: 60%;
   justify-content: end;
 }
 
@@ -2553,7 +2553,7 @@ dialog:focus {
 .pv-media.ready {
   opacity: 1;
   transform: none;
-  max-height:75vh;
+  max-height: 75vh;
 }
 
 .pv-loader {
@@ -2792,6 +2792,7 @@ dialog:focus {
   opacity: 1;
   transform: none;
 }
+
 .preview-title {
-    width: 40%;
+  width: 40%;
 }

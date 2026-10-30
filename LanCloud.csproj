@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!-- اگر .NET 10 نصب داری، این خط و نسخه‌ی پکیج پایین را به 10 تغییر بده -->
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>LanCloud</RootNamespace>
