@@ -54,7 +54,6 @@ Anyone on the same network, from a computer, phone, tablet, or any other device 
 - 🔗 **Sharing**: share a file or folder with specific users, or make it public (anyone with the link on your network)
 - 🛠️ **Admin panel**: manage users (including their quotas)
 - 🎨 **Modern UI with light and dark themes**
-- 🌐 **Bilingual interface**: Persian (فارسی) and English
 - 🗃️ **Lightweight storage**: SQLite database, no database server needed
 
 ## Screenshots
@@ -413,7 +412,6 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 - 🔗 **اشتراک‌گذاری** فایل یا پوشه با اشخاص مشخص، یا به‌صورت **عمومی**
 - 🛠️ **بخش مدیریت کاربران** مخصوص مدیر وب‌سایت (شامل مدیریت سهمیه هر کاربر)
 - 🎨 **ظاهر زیبا و مدرن** با دو پوسته **تاریک** و **روشن**
-- 🌐 **رابط دوزبانه**: فارسی و انگلیسی
 - 🗃️ **سبک و ساده**: دیتابیس SQLite و بدون نیاز به نصب سرور دیتابیس
 
 ## تصاویر محیط برنامه
